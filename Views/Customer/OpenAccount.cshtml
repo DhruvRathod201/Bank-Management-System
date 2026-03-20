@@ -1,0 +1,75 @@
+@{
+    Layout = "_CustomerLayout";
+    ViewData["Title"] = "Open New Account";
+    ViewData["Active"] = "OpenAccount";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <p class="text-muted mb-4">Select the type of account you wish to open. Your request will be reviewed by our team.</p>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 account-type-card" onclick="location.href='@Url.Action("OpenAccountForm","Customer",new{type="Savings"})'">
+                    <div class="card-body text-center p-4">
+                        <div class="account-type-icon bg-primary-subtle rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:72px;height:72px">
+                            <i class="bi bi-piggy-bank text-primary fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold">Savings Account</h5>
+                        <p class="text-muted small">Ideal for individuals looking to save money and earn interest.</p>
+                        <ul class="list-unstyled text-start small text-muted">
+                            <li><i class="bi bi-check-circle text-success me-1"></i> Earn interest on savings</li>
+                            <li><i class="bi bi-check-circle text-success me-1"></i> Instant credit eligible</li>
+                            <li><i class="bi bi-check-circle text-success me-1"></i> Free transfers</li>
+                        </ul>
+                        <a asp-controller="Customer" asp-action="OpenAccountForm" asp-route-type="Savings" class="btn btn-primary w-100 mt-2">
+                            <i class="bi bi-plus-circle me-1"></i> Apply Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 account-type-card">
+                    <div class="card-body text-center p-4">
+                        <div class="account-type-icon bg-success-subtle rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:72px;height:72px">
+                            <i class="bi bi-briefcase text-success fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold">Current Account</h5>
+                        <p class="text-muted small">Best for businesses needing frequent transactions.</p>
+                        <ul class="list-unstyled text-start small text-muted">
+                            <li><i class="bi bi-check-circle text-success me-1"></i> Unlimited transactions</li>
+                            <li><i class="bi bi-check-circle text-success me-1"></i> Business features</li>
+                            <li><i class="bi bi-check-circle text-success me-1"></i> Overdraft facility</li>
+                        </ul>
+                        <a asp-controller="Customer" asp-action="OpenAccountForm" asp-route-type="Current" class="btn btn-success w-100 mt-2">
+                            <i class="bi bi-plus-circle me-1"></i> Apply Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100 account-type-card">
+                    <div class="card-body text-center p-4">
+                        <div class="account-type-icon bg-warning-subtle rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:72px;height:72px">
+                            <i class="bi bi-safe text-warning fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold">Fixed Deposit</h5>
+                        <p class="text-muted small">Lock your funds for higher returns over a fixed period.</p>
+                        <ul class="list-unstyled text-start small text-muted">
+                            <li><i class="bi bi-check-circle text-success me-1"></i> Higher interest rates</li>
+                            <li><i class="bi bi-check-circle text-success me-1"></i> Secure investment</li>
+                            <li><i class="bi bi-check-circle text-success me-1"></i> Flexible duration</li>
+                        </ul>
+                        <a asp-controller="Customer" asp-action="OpenAccountForm" asp-route-type="FixedDeposit" class="btn btn-warning w-100 mt-2">
+                            <i class="bi bi-plus-circle me-1"></i> Apply Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .account-type-card { cursor:pointer; transition: transform .2s, box-shadow .2s; }
+    .account-type-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.12) !important; }
+</style>

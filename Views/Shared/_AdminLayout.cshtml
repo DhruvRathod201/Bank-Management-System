@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] – NEXBank Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body class="dashboard-body">
+
+<div class="d-flex" style="min-height:100vh">
+    <!-- Sidebar -->
+    <nav class="sidebar sidebar-admin d-flex flex-column p-0" style="width:265px;min-width:265px">
+        <div class="sidebar-brand px-4 py-4">
+            <span class="brand-seal"><i class="bi bi-shield-fill" style="color:var(--velvet);font-size:.75rem"></i></span>
+            <span class="brand-text">NEXBank Admin</span>
+        </div>
+        <div class="px-3 py-2 flex-grow-1">
+            <small class="sidebar-section-label">Administration</small>
+            <ul class="nav flex-column mt-1">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewData["Active"]?.ToString()=="Dashboard"?"active":"")" asp-controller="Admin" asp-action="Dashboard">
+                        <i class="bi bi-speedometer2"></i><span> Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewData["Active"]?.ToString()=="Customers"?"active":"")" asp-controller="Admin" asp-action="Customers">
+                        <i class="bi bi-people"></i><span> Customers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewData["Active"]?.ToString()=="Accounts"?"active":"")" asp-controller="Admin" asp-action="Accounts">
+                        <i class="bi bi-credit-card-2-front"></i><span> Accounts</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewData["Active"]?.ToString()=="Transactions"?"active":"")" asp-controller="Admin" asp-action="Transactions">
+                        <i class="bi bi-clock-history"></i><span> Transactions</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewData["Active"]?.ToString()=="PendingRequests"?"active":"")" asp-controller="Admin" asp-action="PendingRequests">
+                        <i class="bi bi-hourglass-split"></i><span> Pending Requests</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewData["Active"]?.ToString()=="InstantCredits"?"active":"")" asp-controller="Admin" asp-action="InstantCredits">
+                        <i class="bi bi-cash-coin"></i><span> Instant Credits</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewData["Active"]?.ToString()=="AdminCredit"?"active":"")" asp-controller="Admin" asp-action="AdminCredit">
+                        <i class="bi bi-plus-circle"></i><span> Admin Credit</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(ViewData["Active"]?.ToString()=="Reports"?"active":"")" asp-controller="Admin" asp-action="Reports">
+                        <i class="bi bi-bar-chart-line"></i><span> Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="px-3 pb-4">
+            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.18),transparent);margin-bottom:.75rem"></div>
+            <a class="nav-link text-danger" asp-controller="Auth" asp-action="Logout">
+                <i class="bi bi-box-arrow-left"></i><span> Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 d-flex flex-column">
+        <div class="topbar px-4 py-3 d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">@ViewData["Title"]</h5>
+            <div class="d-flex align-items-center gap-2">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible py-2 px-3 mb-0" role="alert">
+                        <i class="bi bi-check-circle me-1"></i> @TempData["Success"]
+                        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible py-2 px-3 mb-0" role="alert">
+                        <i class="bi bi-exclamation-circle me-1"></i> @TempData["Error"]
+                        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                <span class="badge px-3 py-2" style="background:var(--burgundy-pale);color:var(--burgundy);font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.06em">
+                    <i class="bi bi-shield-fill me-1"></i> @User.Identity!.Name
+                </span>
+            </div>
+        </div>
+        <div class="p-4 flex-grow-1">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,114 @@
+@using BankManagementSystem.Models
+@model List<Account>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Manage Accounts";
+    ViewData["Active"] = "Accounts";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0">@Model.Count account(s) total</p>
+    <a asp-action="AdminCredit" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Admin Credit
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header py-3">
+        <h6 class="mb-0">All Bank Accounts</h6>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-credit-card fs-1"></i>
+                <p class="mt-2">No accounts found.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr><th>Account No.</th><th>Customer</th><th>Type</th><th>Balance</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var acc in Model.OrderByDescending(a => a.CreatedAt))
+                        {
+                            <tr>
+                                <td class="fw-semibold small">@acc.AccountNumber</td>
+                                <td>
+                                    <div class="fw-semibold">@acc.Customer.User.FullName</div>
+                                    <div class="text-muted small">@acc.Customer.User.Email</div>
+                                </td>
+                                <td><span class="badge bg-primary-subtle text-primary">@acc.AccountType</span></td>
+                                <td class="fw-semibold">₹@acc.Balance.ToString("N0")</td>
+                                <td>
+                                    @if (acc.Status == AccountStatus.Active)
+                                    {
+                                        <span class="badge bg-success-subtle text-success">Active</span>
+                                    }
+                                    else if (acc.Status == AccountStatus.Frozen)
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning">Frozen</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary">Closed</span>
+                                    }
+                                </td>
+                                <td class="text-muted small">@acc.CreatedAt.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        <a asp-action="AdminCredit" asp-route-accountId="@acc.Id" class="btn btn-xs btn-outline-success" title="Add money">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </a>
+                                        @if (acc.Status == AccountStatus.Active)
+                                        {
+                                            <form asp-action="FreezeAccount" asp-route-id="@acc.Id" method="post" class="d-inline">
+                                                <button class="btn btn-xs btn-warning" title="Freeze" onclick="return confirm('Freeze this account?')">
+                                                    <i class="bi bi-snow"></i>
+                                                </button>
+                                            </form>
+                                            <form asp-action="CloseAccount" asp-route-id="@acc.Id" method="post" class="d-inline">
+                                                <button class="btn btn-xs btn-secondary" title="Close" onclick="return confirm('Close this account?')">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else if (acc.Status == AccountStatus.Frozen)
+                                        {
+                                            <form asp-action="UnfreezeAccount" asp-route-id="@acc.Id" method="post" class="d-inline">
+                                                <button class="btn btn-xs btn-success" title="Unfreeze">
+                                                    <i class="bi bi-sun"></i>
+                                                </button>
+                                            </form>
+                                            <form asp-action="CloseAccount" asp-route-id="@acc.Id" method="post" class="d-inline">
+                                                <button class="btn btn-xs btn-secondary" title="Close" onclick="return confirm('Close this account?')">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else if (acc.Status == AccountStatus.Closed)
+                                        {
+                                            <form asp-action="ReopenAccount" asp-route-id="@acc.Id" method="post" class="d-inline">
+                                                <button class="btn btn-xs btn-outline-primary" title="Reopen" onclick="return confirm('Reopen this account?')">
+                                                    <i class="bi bi-arrow-counterclockwise"></i> Reopen
+                                                </button>
+                                            </form>
+                                            <form asp-action="DeleteAccount" asp-route-id="@acc.Id" method="post" class="d-inline">
+                                                <button class="btn btn-xs btn-danger" title="Delete permanently" onclick="return confirm('Permanently delete this account? This cannot be undone.')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

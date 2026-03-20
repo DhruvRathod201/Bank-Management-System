@@ -1,0 +1,99 @@
+@using BankManagementSystem.Models
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin Credit — Add Funds";
+    ViewData["Active"] = "Accounts";
+    var allAccounts = ViewBag.AllAccounts as List<Account> ?? new();
+    var selectedId = ViewBag.SelectedAccountId as int?;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header py-3">
+                <h6 class="mb-0"><i class="bi bi-plus-circle me-2 text-success"></i>Admin Credit — Add Funds to Account</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning small mb-4">
+                    <i class="bi bi-shield-lock me-1"></i>
+                    <strong>Admin Only.</strong> This is the only way to add money to a customer's account (including frozen accounts). Every credit is logged in the audit trail.
+                </div>
+
+                <form asp-action="AdminCredit" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Select Account</label>
+                        <select name="accountId" class="form-select" id="accSel" onchange="updateInfo(this)">
+                            <option value="">— Choose account —</option>
+                            @foreach (var acc in allAccounts.OrderBy(a => a.Customer.User.FullName))
+                            {
+                                var label = $"{acc.AccountNumber} · {acc.Customer.User.FullName} · ₹{acc.Balance:N0} ({acc.Status})";
+                                if (selectedId == acc.Id)
+                                {
+                                    <option value="@acc.Id" data-balance="@acc.Balance" data-status="@acc.Status" selected>@label</option>
+                                }
+                                else
+                                {
+                                    <option value="@acc.Id" data-balance="@acc.Balance" data-status="@acc.Status">@label</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div id="accInfo" class="alert alert-light border mb-3 d-none">
+                        <div class="d-flex justify-content-between">
+                            <span>Current Balance:</span><strong id="balDisp">—</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Status:</span><strong id="statusDisp">—</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Amount to Credit (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" name="amount" class="form-control" min="1" step="1" placeholder="Enter whole amount" required />
+                        </div>
+                        <div class="d-flex gap-2 mt-2 flex-wrap">
+                            @foreach (var amt in new[]{500, 1000, 5000, 10000, 50000})
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.querySelector('[name=amount]').value=@amt">₹@amt.ToString("N0")</button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Note / Reason</label>
+                        <input type="text" name="note" class="form-control" placeholder="e.g. Loan disbursement, instant credit, correction..." maxlength="200" />
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" onclick="return confirm('Confirm adding funds to this account?')">
+                            <i class="bi bi-check-circle me-2"></i>Confirm Credit
+                        </button>
+                        <a asp-action="Accounts" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function updateInfo(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const bal = parseFloat(opt.getAttribute('data-balance') || 0);
+    const status = opt.getAttribute('data-status') || '';
+    if (!opt.value) { document.getElementById('accInfo').classList.add('d-none'); return; }
+    document.getElementById('accInfo').classList.remove('d-none');
+    document.getElementById('balDisp').textContent = '₹' + bal.toLocaleString('en-IN', {minimumFractionDigits:0});
+    document.getElementById('statusDisp').textContent = status;
+}
+// Auto-show if pre-selected
+document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('accSel');
+    if (sel.value) updateInfo(sel);
+});
+</script>
+}

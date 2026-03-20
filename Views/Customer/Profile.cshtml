@@ -1,0 +1,83 @@
+@model BankManagementSystem.DTOs.UpdateProfileDto
+@using BankManagementSystem.Models
+@{
+    Layout = "_CustomerLayout";
+    ViewData["Title"] = "My Profile";
+    ViewData["Active"] = "Profile";
+    var customer = ViewBag.Customer as Customer;
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm text-center p-4">
+            <div class="d-flex justify-content-center mb-3">
+                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:80px;height:80px;font-size:2rem">
+                    @customer?.User?.FullName?.Substring(0,1).ToUpper()
+                </div>
+            </div>
+            <h5 class="fw-bold mb-1">@customer?.User?.FullName</h5>
+            <p class="text-muted small mb-1">@customer?.User?.Email</p>
+            <span class="badge bg-@(customer?.Status == CustomerStatus.Active ? "success" : "warning")-subtle text-@(customer?.Status == CustomerStatus.Active ? "success" : "warning") mb-3">
+                @customer?.Status
+            </span>
+            <div class="border-top pt-3">
+                <div class="row text-start g-2">
+                    <div class="col-12"><small class="text-muted">Phone</small><div class="fw-semibold">@customer?.Phone</div></div>
+                    <div class="col-12"><small class="text-muted">Date of Birth</small><div class="fw-semibold">@customer?.DateOfBirth.ToString("dd MMM yyyy")</div></div>
+                    <div class="col-12"><small class="text-muted">Gender</small><div class="fw-semibold">@customer?.Gender</div></div>
+                    <div class="col-12"><small class="text-muted">Member Since</small><div class="fw-semibold">@customer?.RegisteredAt.ToString("dd MMM yyyy")</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">Update Profile</h6>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Profile" method="post">
+                    <h6 class="text-muted fw-semibold mb-3">Contact Information</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                                <input asp-for="Phone" class="form-control" value="@customer?.Phone" />
+                            </div>
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Address</label>
+                            <textarea asp-for="Address" class="form-control" rows="2">@customer?.Address</textarea>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <h6 class="text-muted fw-semibold mb-3">Change Password <small class="text-muted fw-normal">(optional)</small></h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Current Password</label>
+                            <input asp-for="CurrentPassword" class="form-control" type="password" placeholder="Current password" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">New Password</label>
+                            <input asp-for="NewPassword" class="form-control" type="password" placeholder="New password" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Confirm New</label>
+                            <input asp-for="ConfirmNewPassword" class="form-control" type="password" placeholder="Confirm new" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary fw-semibold">
+                            <i class="bi bi-save me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

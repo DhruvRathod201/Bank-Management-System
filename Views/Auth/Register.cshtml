@@ -1,0 +1,113 @@
+@model BankManagementSystem.DTOs.RegisterDto
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Register";
+}
+
+<div class="auth-bg-dark">
+    <div class="auth-content d-flex align-items-center justify-content-center min-vh-100 px-3 py-5">
+        <div class="auth-card p-5" style="max-width:530px;width:100%">
+
+            <div class="text-center mb-4">
+                <div class="auth-logo-seal mb-3">
+                    <i class="bi bi-person-plus"></i>
+                </div>
+                <div class="auth-title">Create Account</div>
+                <div class="auth-subtitle">Join NEXBank today</div>
+            </div>
+
+            <div class="ornament mb-4">New Member Registration</div>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger py-2 mb-3"><i class="bi bi-exclamation-circle me-1"></i> @TempData["Error"]</div>
+            }
+
+            <form asp-action="Register" method="post">
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label">Full Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input asp-for="FullName" class="form-control" placeholder="John Doe" />
+                    </div>
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input asp-for="Email" class="form-control" placeholder="your@email.com" />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Phone" class="form-label">Phone Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                            <input asp-for="Phone" class="form-control" placeholder="9876543210" />
+                        </div>
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Gender" class="form-label">Gender</label>
+                        <select asp-for="Gender" class="form-select">
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="DateOfBirth" class="form-label">Date of Birth</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                        <input asp-for="DateOfBirth" class="form-control" type="date" />
+                    </div>
+                    <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input asp-for="Password" class="form-control" type="password" placeholder="Min 6 characters" id="regPwd" />
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePwd('regPwd',this)"><i class="bi bi-eye"></i></button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                        <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Repeat password" id="confPwd" />
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePwd('confPwd',this)"><i class="bi bi-eye"></i></button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-person-check me-2"></i>Create Account
+                    </button>
+                </div>
+            </form>
+
+            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.25),transparent);margin:1.25rem 0"></div>
+            <p class="text-center mb-0" style="font-family:'EB Garamond',serif;font-size:1rem;color:var(--muted)">
+                Already have an account? <a asp-controller="Auth" asp-action="Login" style="color:var(--burgundy);font-weight:700">Login here</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function togglePwd(id, btn) {
+    const el = document.getElementById(id);
+    const isText = el.type === 'text';
+    el.type = isText ? 'password' : 'text';
+    btn.innerHTML = isText ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+}
+</script>
+}

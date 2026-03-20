@@ -1,0 +1,111 @@
+@using BankManagementSystem.Models
+@model Customer
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Customer Details";
+    ViewData["Active"] = "Customers";
+    var accounts = ViewBag.Accounts as List<Account> ?? new();
+    var statusColor = Model.Status switch {
+        CustomerStatus.Active => "success", CustomerStatus.Pending => "warning",
+        CustomerStatus.Blocked => "danger", _ => "secondary"
+    };
+}
+
+<div class="mb-3">
+    <a asp-action="Customers" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back to Customers</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm text-center p-4">
+            <div class="d-flex justify-content-center mb-3">
+                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:72px;height:72px;font-size:1.8rem">
+                    @Model.User.FullName.Substring(0,1).ToUpper()
+                </div>
+            </div>
+            <h5 class="fw-bold mb-1">@Model.User.FullName</h5>
+            <p class="text-muted small mb-2">@Model.User.Email</p>
+            <span class="badge bg-@statusColor-subtle text-@statusColor fs-6 mb-3">@Model.Status</span>
+            <div class="border-top pt-3 text-start">
+                <div class="mb-2"><small class="text-muted">Phone</small><div class="fw-semibold">@Model.Phone</div></div>
+                <div class="mb-2"><small class="text-muted">Date of Birth</small><div class="fw-semibold">@Model.DateOfBirth.ToString("dd MMM yyyy")</div></div>
+                <div class="mb-2"><small class="text-muted">Gender</small><div class="fw-semibold">@Model.Gender</div></div>
+                <div class="mb-2"><small class="text-muted">Address</small><div class="fw-semibold">@(string.IsNullOrEmpty(Model.Address) ? "—" : Model.Address)</div></div>
+                <div><small class="text-muted">Registered</small><div class="fw-semibold">@Model.RegisteredAt.ToString("dd MMM yyyy")</div></div>
+            </div>
+            <div class="border-top pt-3 mt-3 d-flex flex-wrap gap-2 justify-content-center">
+                @if (Model.Status == CustomerStatus.Pending)
+                {
+                    <form asp-action="ApproveCustomer" asp-route-id="@Model.Id" method="post">
+                        <button class="btn btn-success btn-sm" onclick="return confirm('Approve?')"><i class="bi bi-check-lg me-1"></i>Approve</button>
+                    </form>
+                    <form asp-action="RejectCustomer" asp-route-id="@Model.Id" method="post">
+                        <button class="btn btn-warning btn-sm" onclick="return confirm('Reject?')"><i class="bi bi-x-lg me-1"></i>Reject</button>
+                    </form>
+                }
+                @if (Model.Status == CustomerStatus.Active)
+                {
+                    <form asp-action="BlockCustomer" asp-route-id="@Model.Id" method="post">
+                        <button class="btn btn-danger btn-sm" onclick="return confirm('Block this customer?')"><i class="bi bi-slash-circle me-1"></i>Block</button>
+                    </form>
+                }
+                @if (Model.Status == CustomerStatus.Blocked)
+                {
+                    <form asp-action="UnblockCustomer" asp-route-id="@Model.Id" method="post">
+                        <button class="btn btn-success btn-sm"><i class="bi bi-check-circle me-1"></i>Unblock</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">Accounts (@accounts.Count)</h6>
+            </div>
+            <div class="card-body p-0">
+                @if (!accounts.Any())
+                {
+                    <div class="text-center py-4 text-muted"><p>No accounts.</p></div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr><th>Account No.</th><th>Type</th><th>Balance</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var acc in accounts)
+                                {
+                                    var sc = acc.Status == AccountStatus.Active ? "success" : acc.Status == AccountStatus.Frozen ? "warning" : "secondary";
+                                    <tr>
+                                        <td class="fw-semibold small">@acc.AccountNumber</td>
+                                        <td><span class="badge bg-primary-subtle text-primary">@acc.AccountType</span></td>
+                                        <td class="fw-bold">₹@acc.Balance.ToString("N2")</td>
+                                        <td><span class="badge bg-@sc-subtle text-@sc">@acc.Status</span></td>
+                                        <td class="text-muted small">@acc.CreatedAt.ToString("dd MMM yyyy")</td>
+                                        <td>
+                                            @if (acc.Status == AccountStatus.Active)
+                                            {
+                                                <form asp-action="FreezeAccount" asp-route-id="@acc.Id" method="post" class="d-inline">
+                                                    <button class="btn btn-xs btn-warning" onclick="return confirm('Freeze account?')">Freeze</button>
+                                                </form>
+                                            }
+                                            @if (acc.Status == AccountStatus.Frozen)
+                                            {
+                                                <form asp-action="UnfreezeAccount" asp-route-id="@acc.Id" method="post" class="d-inline">
+                                                    <button class="btn btn-xs btn-success">Unfreeze</button>
+                                                </form>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

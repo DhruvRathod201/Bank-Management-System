@@ -1,0 +1,141 @@
+@model BankManagementSystem.DTOs.AccountRequestDto
+@using BankManagementSystem.Models
+@{
+    Layout = "_CustomerLayout";
+    var type = ViewBag.Type as string ?? "Savings";
+    var accountType = Enum.Parse<AccountType>(type == "Current" ? "Current" : type == "FixedDeposit" ? "FixedDeposit" : "Savings");
+    ViewData["Title"] = $"Apply for {type} Account";
+    ViewData["Active"] = "OpenAccount";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <div class="d-flex align-items-center">
+                    <a asp-controller="Customer" asp-action="OpenAccount" class="btn btn-sm btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h5 class="mb-0 fw-bold">@type Account Application</h5>
+                        <small class="text-muted">Fill in all details carefully</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="OpenAccountForm" method="post">
+                    <input type="hidden" asp-for="AccountType" value="@accountType" />
+
+                    @if (type == "Savings")
+                    {
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Address</label>
+                            <textarea asp-for="Address" class="form-control" rows="2" placeholder="Your residential address"></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Occupation</label>
+                                <input asp-for="Occupation" class="form-control" placeholder="e.g. Software Engineer" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Monthly Salary (₹)</label>
+                                <input asp-for="MonthlySalary" class="form-control" type="number" placeholder="50000" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Number of Family Members</label>
+                            <input asp-for="FamilyMembers" class="form-control" type="number" min="1" placeholder="4" />
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nominee Name</label>
+                                <input asp-for="NomineeName" class="form-control" placeholder="Full name" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nominee Relation</label>
+                                <input asp-for="NomineeRelation" class="form-control" placeholder="e.g. Spouse, Parent" />
+                            </div>
+                        </div>
+                    }
+                    else if (type == "Current")
+                    {
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Business Name</label>
+                                <input asp-for="BusinessName" class="form-control" placeholder="Company Ltd." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Business Type</label>
+                                <select asp-for="BusinessType" class="form-select">
+                                    <option value="">Select type</option>
+                                    <option>Sole Proprietorship</option>
+                                    <option>Partnership</option>
+                                    <option>Private Limited</option>
+                                    <option>Public Limited</option>
+                                    <option>LLP</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Business Address</label>
+                            <textarea asp-for="BusinessAddress" class="form-control" rows="2" placeholder="Registered business address"></textarea>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Annual Income (₹)</label>
+                                <input asp-for="AnnualIncome" class="form-control" type="number" placeholder="1000000" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Number of Employees</label>
+                                <input asp-for="EmployeesCount" class="form-control" type="number" min="1" placeholder="10" />
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Deposit Amount (₹)</label>
+                                <input asp-for="DepositAmount" class="form-control" type="number" placeholder="100000" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Duration (Months)</label>
+                                <select asp-for="DurationMonths" class="form-select">
+                                    <option value="">Select</option>
+                                    <option value="3">3 Months</option>
+                                    <option value="6">6 Months</option>
+                                    <option value="12">12 Months</option>
+                                    <option value="24">24 Months</option>
+                                    <option value="36">36 Months</option>
+                                    <option value="60">60 Months</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nominee Name</label>
+                                <input asp-for="NomineeName" class="form-control" placeholder="Full name" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nominee Relation</label>
+                                <input asp-for="NomineeRelation" class="form-control" placeholder="e.g. Spouse, Parent" />
+                            </div>
+                        </div>
+                    }
+
+                    <div class="alert alert-info small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Your account will be active after admin approval. A minimum balance of ₹10,000 will be seeded upon approval.
+                    </div>
+
+                    <div class="d-grid mt-3">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                            <i class="bi bi-send me-2"></i>Submit Application
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

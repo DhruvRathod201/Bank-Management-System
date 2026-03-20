@@ -1,0 +1,137 @@
+@using BankManagementSystem.Models
+@{
+    Layout = "_CustomerLayout";
+    ViewData["Title"] = "My Accounts";
+    ViewData["Active"] = "Accounts";
+    var accounts = ViewBag.Accounts as List<Account> ?? new();
+    var requests = ViewBag.Requests as List<AccountRequest> ?? new();
+    var pendingReqs = requests.Where(r => r.Status == RequestStatus.Pending).ToList();
+    var rejectedReqs = requests.Where(r => r.Status == RequestStatus.Rejected).ToList();
+}
+
+@if (pendingReqs.Any())
+{
+    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
+        <i class="bi bi-hourglass-split fs-5 mt-1"></i>
+        <div>
+            <strong>Account Request Pending</strong><br />
+            You have @pendingReqs.Count pending account request(s) awaiting admin approval.
+        </div>
+    </div>
+}
+
+@foreach (var rj in rejectedReqs)
+{
+    <div class="alert alert-danger d-flex align-items-start gap-2 mb-3">
+        <i class="bi bi-x-circle fs-5 mt-1"></i>
+        <div>
+            <strong>Account Request Rejected — @rj.AccountType Account</strong><br />
+            <span class="text-muted small">Requested @rj.RequestedAt.ToString("dd MMM yyyy")</span><br />
+            <strong>Reason:</strong> @(string.IsNullOrEmpty(rj.AdminNotes) ? "No reason provided. Please contact the bank." : rj.AdminNotes)
+        </div>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <p class="text-muted mb-0">@accounts.Count account(s)</p>
+    <a asp-controller="Customer" asp-action="OpenAccount" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Open New Account
+    </a>
+</div>
+
+@if (!accounts.Any())
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-credit-card fs-1 text-muted"></i>
+            <h5 class="mt-3">No Accounts Yet</h5>
+            <p class="text-muted">Open your first bank account to get started.</p>
+            <a asp-controller="Customer" asp-action="OpenAccount" class="btn btn-primary">Open Account</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var acc in accounts)
+        {
+            var gradient = acc.AccountType == AccountType.Savings
+                ? "linear-gradient(135deg, var(--burgundy-deep), var(--burgundy-mid))"
+                : acc.AccountType == AccountType.Current
+                ? "linear-gradient(135deg, #1A4A2A, #2D7A47)"
+                : "linear-gradient(135deg, var(--gold-dark), var(--gold))";
+
+            var pendingCredits = acc.InstantCredits.Where(c => c.Status == CreditStatus.PendingSettlement).ToList();
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="p-4 text-white" style="background:@gradient;position:relative">
+                        <div style="position:absolute;inset:0;background:url('data:image/svg+xml,%3Csvg width=200 height=200 xmlns=http://www.w3.org/2000/svg%3E%3Ccircle cx=160 cy=40 r=80 fill=rgba(255,255,255,.06)/%3E%3C/svg%3E') right top/cover no-repeat"></div>
+                        <div class="d-flex justify-content-between align-items-start mb-3" style="position:relative">
+                            <div>
+                                <div style="font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.12em;opacity:.75;text-transform:uppercase">@acc.AccountType Account</div>
+                                <div style="font-family:'Cinzel',serif;font-weight:700;font-size:1rem;letter-spacing:.06em">@acc.AccountNumber</div>
+                            </div>
+                            @if (acc.Status == AccountStatus.Active)
+                            {
+                                <span class="badge" style="background:rgba(255,255,255,.2);font-family:'Cinzel',serif;font-size:.58rem">Active</span>
+                            }
+                            else if (acc.Status == AccountStatus.Frozen)
+                            {
+                                <span class="badge" style="background:rgba(255,200,0,.3);font-family:'Cinzel',serif;font-size:.58rem">⚠ Frozen</span>
+                            }
+                            else
+                            {
+                                <span class="badge" style="background:rgba(0,0,0,.3);font-family:'Cinzel',serif;font-size:.58rem">Closed</span>
+                            }
+                        </div>
+                        <div style="position:relative">
+                            <div style="font-size:.7rem;opacity:.7;font-family:'Cinzel',serif;letter-spacing:.1em;text-transform:uppercase">Available Balance</div>
+                            <div style="font-family:'Cinzel',serif;font-weight:700;font-size:1.6rem">₹@acc.Balance.ToString("N0")</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (acc.Status == AccountStatus.Frozen)
+                        {
+                            <div class="alert alert-warning py-2 small mb-3">
+                                <i class="bi bi-snow me-1"></i>
+                                Account frozen. Contact the bank. Deposits by admin only.
+                            </div>
+                        }
+                        @if (acc.Status == AccountStatus.Closed)
+                        {
+                            <div class="alert alert-secondary py-2 small mb-3">
+                                <i class="bi bi-x-circle me-1"></i>
+                                Account closed. Contact the bank to reopen.
+                            </div>
+                        }
+                        @if (pendingCredits.Any())
+                        {
+                            <div class="alert py-2 small mb-3" style="background:var(--gold-pale);color:var(--gold-dark)">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                Outstanding Credit: ₹@pendingCredits.Sum(c => c.Amount).ToString("N0") — repay at branch
+                            </div>
+                        }
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a asp-controller="Customer" asp-action="AccountDetails" asp-route-id="@acc.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye me-1"></i>Details
+                            </a>
+                            @if (acc.Status == AccountStatus.Active)
+                            {
+                                <a asp-controller="Customer" asp-action="Deposit" asp-route-accountId="@acc.Id" class="btn btn-sm btn-success">
+                                    <i class="bi bi-lightning me-1"></i>Credit
+                                </a>
+                                <a asp-controller="Customer" asp-action="Withdraw" asp-route-accountId="@acc.Id" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-arrow-up me-1"></i>Withdraw
+                                </a>
+                                <a asp-controller="Customer" asp-action="Transfer" asp-route-accountId="@acc.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-arrow-left-right me-1"></i>Transfer
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

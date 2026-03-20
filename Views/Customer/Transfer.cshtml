@@ -1,0 +1,135 @@
+@model BankManagementSystem.DTOs.TransferDto
+@using BankManagementSystem.Models
+@{
+    Layout = "_CustomerLayout";
+    ViewData["Title"] = "Transfer Money";
+    ViewData["Active"] = "Transfer";
+    var accounts = ViewBag.Accounts as List<Account> ?? new();
+    var selectedId = ViewBag.SelectedAccountId as int?;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header py-3">
+                <h6 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>Transfer Money</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info small mb-4">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Minimum balance of <strong>₹10,000</strong> must remain after transfer. Receiver account must exist and be active. Whole numbers only.
+                </div>
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger py-2 mb-3"><i class="bi bi-exclamation-circle me-1"></i> @TempData["Error"]</div>
+                }
+
+                <form asp-action="Transfer" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">From Account</label>
+                        <select asp-for="FromAccountId" class="form-select" onchange="updateBalance(this)">
+                            <option value="">Choose source account...</option>
+                            @foreach (var acc in accounts)
+                            {
+                                var label = $"{acc.AccountNumber} – ₹{acc.Balance:N0} ({acc.Status})";
+                                var disabled = acc.Status != AccountStatus.Active;
+                                if (disabled)
+                                {
+                                    <option value="@acc.Id" data-balance="@acc.Balance" disabled>@label</option>
+                                }
+                                else if (selectedId == acc.Id)
+                                {
+                                    <option value="@acc.Id" data-balance="@acc.Balance" selected>@label</option>
+                                }
+                                else
+                                {
+                                    <option value="@acc.Id" data-balance="@acc.Balance">@label</option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="FromAccountId" class="text-danger small"></span>
+                    </div>
+
+                    <div id="balanceInfo" class="alert alert-light border mb-3 d-none">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Available Balance:</span><strong id="balDisplay">—</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Max Transferable:</span><strong id="maxTransfer" class="text-success">—</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Receiver Account Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-check"></i></span>
+                            <input asp-for="ReceiverAccountNumber" class="form-control"
+                                   placeholder="e.g. NEX123456789"
+                                   style="text-transform:uppercase"
+                                   oninput="this.value=this.value.toUpperCase()" />
+                        </div>
+                        <span asp-validation-for="ReceiverAccountNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Amount (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input asp-for="Amount" class="form-control" type="number" min="1" step="1"
+                                   placeholder="Enter whole amount" id="tAmount"
+                                   oninput="this.value=Math.floor(Math.abs(this.value)||'')" />
+                        </div>
+                        <span asp-validation-for="Amount" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" id="tPwd" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePwd('tPwd',this)"><i class="bi bi-eye"></i></button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" onclick="return confirmTransfer()">
+                            <i class="bi bi-arrow-left-right me-2"></i>Transfer Funds
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function updateBalance(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const bal = Math.floor(parseFloat(opt.getAttribute('data-balance') || 0));
+    if (!opt.value) { document.getElementById('balanceInfo').classList.add('d-none'); return; }
+    document.getElementById('balanceInfo').classList.remove('d-none');
+    document.getElementById('balDisplay').textContent = '₹' + bal.toLocaleString('en-IN');
+    const max = Math.max(0, bal - 10000);
+    document.getElementById('maxTransfer').textContent = '₹' + max.toLocaleString('en-IN');
+    document.getElementById('tAmount').max = max;
+}
+function togglePwd(id, btn) {
+    const el = document.getElementById(id);
+    el.type = el.type === 'text' ? 'password' : 'text';
+    btn.innerHTML = el.type === 'text' ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+}
+function confirmTransfer() {
+    const amt = document.getElementById('tAmount').value;
+    const recv = document.querySelector('[name=ReceiverAccountNumber]').value;
+    if (!amt || !recv) return true;
+    return confirm(`Transfer ₹${parseInt(amt).toLocaleString('en-IN')} to account ${recv}?`);
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.querySelector('[name=FromAccountId]');
+    if (sel && sel.value) updateBalance(sel);
+});
+</script>
+}

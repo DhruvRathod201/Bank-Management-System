@@ -1,0 +1,107 @@
+@using BankManagementSystem.Models
+@model List<Customer>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Manage Customers";
+    ViewData["Active"] = "Customers";
+}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 fw-bold">All Customers <span class="badge bg-secondary ms-1">@Model.Count</span></h6>
+        <div class="d-flex gap-2">
+            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search..." style="width:200px" oninput="filterTable()" />
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="custTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Registered</th>
+                        <th>Accounts</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        var statusColor = c.Status switch {
+                            CustomerStatus.Active => "success",
+                            CustomerStatus.Pending => "warning",
+                            CustomerStatus.Blocked => "danger",
+                            CustomerStatus.Rejected => "secondary",
+                            _ => "secondary"
+                        };
+                        <tr>
+                            <td class="text-muted small">@c.Id</td>
+                            <td class="fw-semibold">@c.User.FullName</td>
+                            <td class="text-muted small">@c.User.Email</td>
+                            <td class="small">@c.Phone</td>
+                            <td class="text-muted small">@c.RegisteredAt.ToString("dd MMM yyyy")</td>
+                            <td><span class="badge bg-primary-subtle text-primary">@c.Accounts.Count</span></td>
+                            <td><span class="badge bg-@statusColor-subtle text-@statusColor">@c.Status</span></td>
+                            <td>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <a asp-action="CustomerDetails" asp-route-id="@c.Id" class="btn btn-xs btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    @if (c.Status == CustomerStatus.Pending)
+                                    {
+                                        <form asp-action="ApproveCustomer" asp-route-id="@c.Id" method="post" class="d-inline">
+                                            <button class="btn btn-xs btn-success" title="Approve" onclick="return confirm('Approve this customer?')">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="RejectCustomer" asp-route-id="@c.Id" method="post" class="d-inline">
+                                            <button class="btn btn-xs btn-warning" title="Reject" onclick="return confirm('Reject this customer?')">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    @if (c.Status == CustomerStatus.Active)
+                                    {
+                                        <form asp-action="BlockCustomer" asp-route-id="@c.Id" method="post" class="d-inline">
+                                            <button class="btn btn-xs btn-danger" title="Block" onclick="return confirm('Block this customer?')">
+                                                <i class="bi bi-slash-circle"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    @if (c.Status == CustomerStatus.Blocked)
+                                    {
+                                        <form asp-action="UnblockCustomer" asp-route-id="@c.Id" method="post" class="d-inline">
+                                            <button class="btn btn-xs btn-success" title="Unblock">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    <form asp-action="DeleteCustomer" asp-route-id="@c.Id" method="post" class="d-inline">
+                                        <button class="btn btn-xs btn-outline-danger" title="Delete" onclick="return confirm('Permanently delete this customer? This cannot be undone.')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function filterTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#custTable tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+}

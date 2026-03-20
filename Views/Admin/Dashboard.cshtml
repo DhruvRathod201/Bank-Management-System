@@ -1,0 +1,116 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Active"] = "Dashboard";
+}
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <a asp-action="Customers" class="text-decoration-none">
+            <div class="stat-card stat-blue">
+                <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+                <div class="stat-value">@ViewBag.TotalCustomers</div>
+                <div class="stat-label">Total Customers</div>
+                <div class="stat-footer text-white-50 small mt-1"><i class="bi bi-arrow-right me-1"></i>View all</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a asp-action="Accounts" class="text-decoration-none">
+            <div class="stat-card stat-green">
+                <div class="stat-icon"><i class="bi bi-credit-card-2-front"></i></div>
+                <div class="stat-value">@ViewBag.TotalAccounts</div>
+                <div class="stat-label">Total Accounts</div>
+                <div class="stat-footer text-white-50 small mt-1"><i class="bi bi-arrow-right me-1"></i>View all</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a asp-action="Transactions" class="text-decoration-none">
+            <div class="stat-card stat-orange">
+                <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+                <div class="stat-value">@ViewBag.TotalTransactions</div>
+                <div class="stat-label">Total Transactions</div>
+                <div class="stat-footer text-white-50 small mt-1"><i class="bi bi-arrow-right me-1"></i>View all</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <a asp-action="PendingRequests" class="text-decoration-none">
+            <div class="stat-card stat-red">
+                <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                <div class="stat-value">@ViewBag.PendingRequests</div>
+                <div class="stat-label">Pending Requests</div>
+                <div class="stat-footer text-white-50 small mt-1"><i class="bi bi-arrow-right me-1"></i>Review now</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h6 class="fw-bold text-muted mb-3">QUICK ACTIONS</h6>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-action="PendingRequests" class="btn btn-outline-primary"><i class="bi bi-hourglass-split me-1"></i> Review Pending Requests</a>
+            <a asp-action="Customers" class="btn btn-outline-success"><i class="bi bi-people me-1"></i> Manage Customers</a>
+            <a asp-action="InstantCredits" class="btn btn-outline-warning"><i class="bi bi-cash-coin me-1"></i> Instant Credits</a>
+            <a asp-action="Reports" class="btn btn-outline-info"><i class="bi bi-bar-chart-line me-1"></i> View Reports</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between">
+                <h6 class="mb-0 fw-bold">System Overview</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <span class="text-muted">Total Customers</span>
+                    <span class="fw-bold text-primary">@ViewBag.TotalCustomers</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <span class="text-muted">Active Accounts</span>
+                    <span class="fw-bold text-success">@ViewBag.TotalAccounts</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <span class="text-muted">Transactions Processed</span>
+                    <span class="fw-bold text-orange">@ViewBag.TotalTransactions</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center py-2">
+                    <span class="text-muted">Pending Approvals</span>
+                    <span class="fw-bold text-danger">@ViewBag.PendingRequests</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">Admin Guide</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="py-2 border-bottom d-flex align-items-center">
+                        <span class="badge bg-warning-subtle text-warning me-2 p-2"><i class="bi bi-1-circle"></i></span>
+                        <span class="small">Approve new customer registrations under <strong>Customers</strong></span>
+                    </li>
+                    <li class="py-2 border-bottom d-flex align-items-center">
+                        <span class="badge bg-primary-subtle text-primary me-2 p-2"><i class="bi bi-2-circle"></i></span>
+                        <span class="small">Review and approve account requests under <strong>Pending Requests</strong></span>
+                    </li>
+                    <li class="py-2 border-bottom d-flex align-items-center">
+                        <span class="badge bg-success-subtle text-success me-2 p-2"><i class="bi bi-3-circle"></i></span>
+                        <span class="small">Settle or extend instant credits under <strong>Instant Credits</strong></span>
+                    </li>
+                    <li class="py-2 d-flex align-items-center">
+                        <span class="badge bg-info-subtle text-info me-2 p-2"><i class="bi bi-4-circle"></i></span>
+                        <span class="small">Monitor all transactions under <strong>Transactions</strong></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

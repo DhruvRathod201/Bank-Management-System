@@ -1,0 +1,106 @@
+@using BankManagementSystem.Models
+@using BankManagementSystem.DTOs
+@model List<Transaction>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "All Transactions";
+    ViewData["Active"] = "Transactions";
+    var filter = ViewBag.Filter as TransactionFilterDto ?? new();
+    var allAccounts = ViewBag.AllAccounts as List<Account> ?? new();
+}
+
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small mb-1">Account</label>
+                <select name="AccountId" class="form-select form-select-sm">
+                    <option value="">All Accounts</option>
+                    @foreach (var acc in allAccounts)
+                    {
+                        if (filter.AccountId == acc.Id)
+                        {
+                            <option value="@acc.Id" selected>@acc.AccountNumber – @acc.Customer.User.FullName</option>
+                        }
+                        else
+                        {
+                            <option value="@acc.Id">@acc.AccountNumber – @acc.Customer.User.FullName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small mb-1">Type</label>
+                <select name="Type" class="form-select form-select-sm">
+                    <option value="">All Types</option>
+                    @foreach (var t in Enum.GetValues<TransactionType>())
+                    {
+                        if (filter.Type == t)
+                        {
+                            <option value="@t" selected>@t</option>
+                        }
+                        else
+                        {
+                            <option value="@t">@t</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small mb-1">From Date</label>
+                <input type="date" name="FromDate" class="form-control form-control-sm" value="@filter.FromDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small mb-1">To Date</label>
+                <input type="date" name="ToDate" class="form-control form-control-sm" value="@filter.ToDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Filter</button>
+                <a asp-action="Transactions" class="btn btn-outline-secondary btn-sm">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+        <h6 class="mb-0 fw-bold">Transactions <span class="badge bg-secondary ms-1">@Model.Count</span></h6>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted"><i class="bi bi-inbox fs-1"></i><p class="mt-2">No transactions found.</p></div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr><th>#</th><th>Customer</th><th>Account</th><th>Type</th><th>Amount</th><th>Date</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var txn in Model)
+                        {
+                            var tc = txn.Type switch {
+                                TransactionType.InstantCredit => "primary",
+                                TransactionType.CreditSettlement => "info",
+                                TransactionType.Withdraw => "danger",
+                                TransactionType.Transfer => "warning",
+                                _ => "secondary"
+                            };
+                            <tr>
+                                <td class="text-muted small">@txn.Id</td>
+                                <td class="small fw-semibold">@txn.Account.Customer.User.FullName</td>
+                                <td class="small">@txn.Account.AccountNumber</td>
+                                <td><span class="badge bg-@tc-subtle text-@tc">@txn.Type</span></td>
+                                <td class="fw-bold">₹@txn.Amount.ToString("N2")</td>
+                                <td class="text-muted small">@txn.CreatedAt.ToString("dd MMM yyyy HH:mm")</td>
+                                <td class="text-muted small" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@txn.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

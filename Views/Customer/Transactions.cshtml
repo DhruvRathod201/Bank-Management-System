@@ -1,0 +1,116 @@
+@using BankManagementSystem.Models
+@using BankManagementSystem.DTOs
+@{
+    Layout = "_CustomerLayout";
+    ViewData["Title"] = "Transaction History";
+    ViewData["Active"] = "Transactions";
+    var accounts = ViewBag.Accounts as List<Account> ?? new();
+    var txns = ViewBag.Transactions as List<Transaction> ?? new();
+    var filter = ViewBag.Filter as TransactionFilterDto ?? new();
+}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small mb-1">Account</label>
+                <select name="AccountId" class="form-select form-select-sm">
+                    <option value="">All Accounts</option>
+                    @foreach (var acc in accounts)
+                    {
+                        if (filter.AccountId == acc.Id)
+                        {
+                            <option value="@acc.Id" selected>@acc.AccountNumber</option>
+                        }
+                        else
+                        {
+                            <option value="@acc.Id">@acc.AccountNumber</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small mb-1">Type</label>
+                <select name="Type" class="form-select form-select-sm">
+                    <option value="">All Types</option>
+                    @foreach (var t in Enum.GetValues<TransactionType>())
+                    {
+                        if (filter.Type == t)
+                        {
+                            <option value="@t" selected>@t</option>
+                        }
+                        else
+                        {
+                            <option value="@t">@t</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small mb-1">From Date</label>
+                <input type="date" name="FromDate" class="form-control form-control-sm" value="@filter.FromDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small mb-1">To Date</label>
+                <input type="date" name="ToDate" class="form-control form-control-sm" value="@filter.ToDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Filter</button>
+                <a asp-action="Transactions" class="btn btn-outline-secondary btn-sm">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+        <h6 class="mb-0 fw-bold">Transactions <span class="badge bg-secondary ms-1">@txns.Count</span></h6>
+    </div>
+    <div class="card-body p-0">
+        @if (!txns.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-clock-history fs-1"></i>
+                <p class="mt-2">No transactions found.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var txn in txns)
+                        {
+                            var isIn = txn.Type == TransactionType.InstantCredit || txn.Type == TransactionType.Deposit || (txn.Type == TransactionType.Transfer && txn.Description.StartsWith("Transfer from"));                            
+                            var typeColor = txn.Type switch {
+                                TransactionType.InstantCredit => "primary",
+                                TransactionType.CreditSettlement => "info",
+                                TransactionType.Withdraw => "danger",
+                                TransactionType.Transfer => "warning",
+                                _ => "secondary"
+                            };
+                            <tr>
+                                <td class="text-muted small">@txn.Id</td>
+                                <td class="small">@txn.CreatedAt.ToString("dd MMM yyyy HH:mm")</td>
+                                <td><span class="badge bg-@typeColor-subtle text-@typeColor">@txn.Type</span></td>
+                                <td class="fw-semibold @(isIn ? "text-success" : "text-danger")">
+                                    @(isIn ? "+" : "-") ₹@txn.Amount.ToString("N2")
+                                </td>
+                                <td class="text-muted small">@txn.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

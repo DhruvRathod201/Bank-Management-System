@@ -1,0 +1,184 @@
+@using BankManagementSystem.Models
+@{
+    Layout = "_CustomerLayout";
+    ViewData["Title"] = "Dashboard";
+    ViewData["Active"] = "Dashboard";
+    var customer = ViewBag.Customer as Customer;
+    var accounts = ViewBag.Accounts as List<Account> ?? new();
+    var recentTxns = ViewBag.RecentTransactions as List<Transaction> ?? new();
+    var accountRequests = ViewBag.AccountRequests as List<AccountRequest> ?? new();
+    var pendingCredits = accounts.SelectMany(a => a.InstantCredits).Where(c => c.Status == CreditStatus.PendingSettlement).ToList();
+    var pendingRequests = accountRequests.Where(r => r.Status == RequestStatus.Pending).ToList();
+    var rejectedRequests = accountRequests.Where(r => r.Status == RequestStatus.Rejected).ToList();
+}
+
+<!-- Overdue credit alerts -->
+@foreach (var credit in pendingCredits)
+{
+    var daysLeft = (credit.Deadline - DateTime.UtcNow).Days;
+    var alertClass = daysLeft <= 0 ? "alert-danger" : daysLeft <= 1 ? "alert-warning" : "alert-info";
+    <div class="alert @alertClass alert-dismissible d-flex align-items-center mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+        <div>
+            <strong>Instant Credit Alert:</strong> ₹@credit.Amount.ToString("N0") outstanding on account
+            @accounts.First(a => a.Id == credit.AccountId).AccountNumber —
+            @(daysLeft <= 0 ? "OVERDUE! Account will be frozen." : $"{daysLeft} day(s) remaining to repay at branch.")
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Account request status alerts -->
+@foreach (var rj in rejectedRequests)
+{
+    <div class="alert alert-danger alert-dismissible d-flex align-items-start gap-2 mb-3">
+        <i class="bi bi-x-circle-fill fs-5 mt-1"></i>
+        <div>
+            <strong>Account Request Rejected — @rj.AccountType Account</strong>
+            <div class="small mt-1"><strong>Reason:</strong> @(string.IsNullOrEmpty(rj.AdminNotes) ? "No reason provided. Please contact the bank." : rj.AdminNotes)</div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (pendingRequests.Any())
+{
+    <div class="alert alert-warning alert-dismissible d-flex align-items-center gap-2 mb-3">
+        <i class="bi bi-hourglass-split fs-5"></i>
+        <div><strong>@pendingRequests.Count Account Request(s) Pending</strong> — awaiting admin approval.</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="bi bi-credit-card-2-front"></i></div>
+            <div class="stat-value">@accounts.Count</div>
+            <div class="stat-label">My Accounts</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="bi bi-wallet2"></i></div>
+            <div class="stat-value">₹@accounts.Sum(a => a.Balance).ToString("N0")</div>
+            <div class="stat-label">Total Balance</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+            <div class="stat-value">@recentTxns.Count</div>
+            <div class="stat-label">Recent Transactions</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
+            <div class="stat-value">₹@pendingCredits.Sum(c => c.Amount).ToString("N0")</div>
+            <div class="stat-label">Outstanding Credits</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h6 class="fw-bold mb-3 text-muted" style="font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase">Quick Actions</h6>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="Customer" asp-action="Deposit" class="btn btn-outline-success"><i class="bi bi-lightning me-1"></i> Instant Credit</a>
+            <a asp-controller="Customer" asp-action="Withdraw" class="btn btn-outline-warning"><i class="bi bi-arrow-up-circle me-1"></i> Withdraw</a>
+            <a asp-controller="Customer" asp-action="Transfer" class="btn btn-outline-primary"><i class="bi bi-arrow-left-right me-1"></i> Transfer</a>
+            <a asp-controller="Customer" asp-action="OpenAccount" class="btn btn-outline-secondary"><i class="bi bi-plus-circle me-1"></i> Open Account</a>
+            <a asp-controller="Customer" asp-action="Transactions" class="btn btn-outline-secondary"><i class="bi bi-list-ul me-1"></i> All Transactions</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Accounts -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0">My Accounts</h6>
+                <a asp-controller="Customer" asp-action="Accounts" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!accounts.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-credit-card fs-1"></i>
+                        <p class="mt-2 small">No accounts yet</p>
+                        <a asp-controller="Customer" asp-action="OpenAccount" class="btn btn-sm btn-primary">Open Account</a>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var acc in accounts)
+                    {
+                        var statusColor = acc.Status == AccountStatus.Active ? "success" :
+                                          acc.Status == AccountStatus.Frozen ? "warning" : "secondary";
+                        <div class="account-row d-flex align-items-center px-4 py-3 border-bottom">
+                            <div class="account-icon me-3 rounded-3 p-2" style="background:var(--burgundy-pale)">
+                                <i class="bi bi-credit-card-2-front" style="color:var(--burgundy)"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold small" style="font-family:'Cinzel',serif;font-size:.78rem">@acc.AccountNumber</div>
+                                <div class="text-muted" style="font-size:.75rem">@acc.AccountType</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold" style="font-family:'Cinzel',serif">₹@acc.Balance.ToString("N0")</div>
+                                <span class="badge bg-@statusColor-subtle text-@statusColor" style="font-size:.6rem">@acc.Status</span>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0">Recent Transactions</h6>
+                <a asp-controller="Customer" asp-action="Transactions" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @if (!recentTxns.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-clock-history fs-1"></i>
+                        <p class="mt-2 small">No transactions yet</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr><th>Type</th><th>Amount</th><th>Date</th><th>Description</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var txn in recentTxns)
+                                {
+                                    var isCredit = txn.Type == TransactionType.InstantCredit || txn.Type == TransactionType.Deposit ||
+                                                   (txn.Type == TransactionType.Transfer && txn.Description.StartsWith("Transfer from"));
+                                    var amtColor = isCredit ? "text-success" : "text-danger";
+                                    var amtSign = isCredit ? "+" : "−";
+                                    <tr>
+                                        <td><span class="badge bg-secondary-subtle text-secondary">@txn.Type</span></td>
+                                        <td class="fw-semibold @amtColor">@amtSign ₹@txn.Amount.ToString("N0")</td>
+                                        <td class="text-muted small">@txn.CreatedAt.ToString("dd MMM yyyy")</td>
+                                        <td class="text-muted small" style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@txn.Description</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
